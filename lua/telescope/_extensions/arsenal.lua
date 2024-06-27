@@ -5,7 +5,10 @@ if not ok then
 end
 
 local arsenals = {}
-local handle = vim.loop.fs_scandir(vim.fn.stdpath("config") .. vim.g.separator .. "lua" .. vim.g.separator .. "arsenal")
+local default_opts = {
+    path = vim.fn.stdpath("config") .. vim.g.separator .. "arsenal"
+}
+local handle = vim.loop.fs_scandir(default_opts.path)
 
 while true do
     local name, type = vim.loop.fs_scandir_next(handle)
@@ -30,8 +33,6 @@ local function make_arsenal()
     for _, val in ipairs(arsenals) do
         table.insert(languagesPicker, {
             toolName = val
-            -- lang = val.name,
-            -- cmd = val.cmd,
         })
     end
     return languagesPicker
@@ -43,7 +44,7 @@ local function make_entry()
     local displayer = entry_display.create {
         separator = "",
         items = {
-            { width = 15 },
+            { width = 30 },
             { remaining = true }
         }
     }
@@ -51,18 +52,20 @@ local function make_entry()
     -- What content is displaying
     local make_display = function(entry)
         return displayer {
-            entry.toolName,
+            entry.toolName
         }
     end
 
-    -- Internal sorting
+    -- Entry will be from make_arsenal()
+    -- Define what needs to be in make_display()
     return function(entry)
         return {
             value = entry,
+            -- Internal sorting
             ordinal = entry.toolName,
             display = make_display,
-            -- lang = entry.lang,
-            -- cmd = entry.cmd,
+            -- Used in make_display()
+            toolName = entry.toolName
         }
     end
 end
@@ -86,7 +89,7 @@ local function make_picker()
         attach_mappings = function(prompt_bufnr)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
-                vim.cmd(action_state.get_selected_entry().toolName)
+                vim.cmd("edit " .. arsenals_path .. vim.g.separator .. action_state.get_selected_entry().toolName)
             end)
             return true
         end,
@@ -94,12 +97,11 @@ local function make_picker()
 end
 
 return require("telescope").register_extension {
-    -- setup = function(user_opts, _)
-    --     -- if next(user_opts) ~= nil then
-    --         -- compilers = vim.tbl_extend('force', compilers, user_opts.custom_compilers)
-    --         -- opts = vim.tbl_extend('force', default_opts, user_opts)
-    --     -- end
-    -- end,
+    setup = function(user_opts, _)
+        if next(user_opts) ~= nil then
+            opts = vim.tbl_extend('force', default_opts, user_opts)
+        end
+    end,
     exports = {
         arsenal = make_picker
     }
