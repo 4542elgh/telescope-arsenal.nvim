@@ -89,7 +89,7 @@ local function make_picker()
         attach_mappings = function(prompt_bufnr)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
-                vim.cmd("edit " .. arsenals_path .. vim.g.separator .. action_state.get_selected_entry().toolName)
+                vim.cmd("edit " .. default_opts.path .. vim.g.separator .. action_state.get_selected_entry().toolName)
             end)
             return true
         end,
@@ -99,7 +99,7 @@ end
 return require("telescope").register_extension {
     setup = function(user_opts, _)
         if next(user_opts) ~= nil then
-            opts = vim.tbl_extend('force', default_opts, user_opts)
+            vim.tbl_extend('force', default_opts, user_opts)
         end
     end,
     exports = {
