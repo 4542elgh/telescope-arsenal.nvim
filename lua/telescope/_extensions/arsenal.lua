@@ -1,8 +1,11 @@
 -- Check telescope is installed
-local ok, telescope = pcall(require, 'telescope')
-local handle = vim.loop.fs_scandir(vim.fn.stdpath("config") .. vim.g.separator .. "lua" .. vim.g.separator .. "arsenal")
+local ok, _ = pcall(require, 'telescope')
+if not ok then
+    vim.notify('Install nvim-telescope/telescope.nvim to use 4542elgh/telescope-arsenal.nvim.', vim.log.levels.ERROR)
+end
 
 local arsenals = {}
+local handle = vim.loop.fs_scandir(vim.fn.stdpath("config") .. vim.g.separator .. "lua" .. vim.g.separator .. "arsenal")
 
 while true do
     local name, type = vim.loop.fs_scandir_next(handle)
@@ -10,10 +13,6 @@ while true do
     if type == 'file' then
         table.insert(arsenals, name)
     end
-end
-
-if not ok then
-    vim.notify('Install nvim-telescope/telescope.nvim to use 4542elgh/telescope-arsenal.nvim.', vim.log.levels.ERROR)
 end
 
 -- Telescope utils
@@ -28,7 +27,7 @@ local action_state = require "telescope.actions.state"
 -- Make format better
 local function make_arsenal()
     local languagesPicker = {}
-    for _, val in pairs(arsenals) do
+    for _, val in ipairs(arsenals) do
         table.insert(languagesPicker, {
             toolName = val
             -- lang = val.name,
@@ -95,14 +94,13 @@ local function make_picker()
 end
 
 return require("telescope").register_extension {
-    setup = function(user_opts, _)
-        -- if next(user_opts) ~= nil then
-            -- compilers = vim.tbl_extend('force', compilers, user_opts.custom_compilers)
-            -- opts = vim.tbl_extend('force', default_opts, user_opts)
-        -- end
-    end,
+    -- setup = function(user_opts, _)
+    --     -- if next(user_opts) ~= nil then
+    --         -- compilers = vim.tbl_extend('force', compilers, user_opts.custom_compilers)
+    --         -- opts = vim.tbl_extend('force', default_opts, user_opts)
+    --     -- end
+    -- end,
     exports = {
-        scratch_run = make_picker,
-        all = make_picker
+        arsenal = make_picker
     }
 }
